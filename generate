@@ -1,0 +1,85 @@
+#!/bin/sh
+
+set -xeuo pipefail
+
+if [ ! -d 'lstackly' ]; then
+  git clone https://git.sr.ht/~shakna/lstackly
+else
+  cd lstackly
+  git pull origin master
+  cd ..
+fi
+
+if [ -d build ]; then
+  rm -rf build
+fi
+mkdir build
+
+pandoc lstackly/README.md -o build/index.html
+
+mkdir build/autodoc
+
+while read -r line; do
+	echo "<p>$line</p>" >> build/autodoc/index.html
+done < lstackly/AutoDoc
+
+# examples directory and index listing
+mkdir build/examples
+echo '<ul>' >> build/examples/index.html
+for f in lstackly/examples/*.stk; do
+	name="$(basename "$f" .stk)"
+
+    echo '<li><a href="/examples/'"$name".html'">' "$name" '</a></li>' >> build/examples/index.html
+
+    echo '<style>code {white-space:pre;}</style>' >> build/examples/"$name".html
+    echo '<code>' >> build/examples/"$name".html
+	cat "$f" >> build/examples/"$name".html
+	echo '</code>' >> build/examples/"$name".html
+done
+echo '</ul>' >> build/examples/index.html
+
+# rosetta directory and index listing
+mkdir build/rosetta
+echo '<ul>' >> build/rosetta/index.html
+for f in lstackly/rosetta/*.stk; do
+	name="$(basename "$f" .stk)"
+
+    echo '<li><a href="/rosetta/'"$name".html'">' "$name" '</a></li>' >> build/rosetta/index.html
+
+    echo '<style>code {white-space:pre;}</style>' >> build/rosetta/"$name".html
+    echo '<code>' >> build/rosetta/"$name".html
+	cat "$f" >> build/rosetta/"$name".html
+	echo '</code>' >> build/rosetta/"$name".html
+done
+echo '</ul>' >> build/rosetta/index.html
+
+# book directory and index listing
+mkdir build/book
+echo '<ul>' >> build/book/index.html
+for f in lstackly/book/*.md; do
+	name="$(basename "$f" .md)"
+	title="$(head -n1 "$f" | tr -dc A-Za-z0-9)"
+	
+	echo '<li><a href="/book/'"$name".html'">' "$title" '</a></li>' >> build/book/index.html
+
+	pandoc "$f" -o build/book/"$name".html
+done
+echo '</ul>' >> build/book/index.html
+
+# Navigation and Head
+find build -type f  -print0 | while IFS= read -r -d $'\0' line; do 
+    if echo "$line" | grep -q html; then
+    	nav='<ul><li><a href="/index.html">Home</a></li><li><a href="/autodoc/">AutoDoc</a></li><li><a href="/book/">Book</a></li><li><a href="/examples/">Examples</a></li><li><a href="/rosetta/">RosettaCode Examples</a></li></ul>'
+    	echo "<hr> $nav" >> "$line"
+
+    	tmp="$(mktemp)"
+    	universal_css='<style>@media(min-width: 30em) {body {max-width: 70vw;margin: 0 auto;}}</style>'
+    	proper_head='<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Stackly</title>'
+    	echo "$proper_head $nav $universal_css <hr>" | cat - "$line" > "$tmp" && mv "$tmp" "$line"
+    fi
+done
+
+if [ "$1" = 'run' ]; then
+	cd build
+	python3 -m http.server
+fi
