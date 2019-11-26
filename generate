@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -xeuo pipefail
+set -xeu
 
 if [ ! -d 'lstackly' ]; then
   git clone https://git.sr.ht/~shakna/lstackly
