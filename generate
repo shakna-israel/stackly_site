@@ -75,7 +75,7 @@ while read -r line; do
 
     	tmp="$(mktemp)"
     	universal_css='<style>@media(min-width: 30em) {body {max-width: 70vw;margin: 0 auto;}}</style>'
-    	proper_head='<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Stackly</title>'
+    	proper_head='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Stackly</title></head>'
     	echo "$proper_head $nav $universal_css <hr>" | cat - "$line" > "$tmp" && mv "$tmp" "$line"
     fi
 done < build_list
