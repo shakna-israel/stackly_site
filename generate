@@ -82,4 +82,6 @@ done
 if [ "$1" = 'run' ]; then
 	cd build
 	python3 -m http.server
+elif [ "$1" = 'netlify' ]; then
+	rm -rf lstackly
 fi
