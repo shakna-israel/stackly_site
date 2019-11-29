@@ -18,10 +18,7 @@ mkdir build
 pandoc lstackly/README.md -o build/index.html
 
 mkdir build/autodoc
-
-while read -r line; do
-	echo "<p>$line</p>" >> build/autodoc/index.html
-done < lstackly/AutoDoc
+pandoc lstackly/AutoDoc.md -o build/autodoc/index.html
 
 # examples directory and index listing
 mkdir build/examples
