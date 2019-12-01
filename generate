@@ -63,11 +63,18 @@ for f in lstackly/book/*.md; do
 done
 echo '</ul>' >> build/book/index.html
 
+# Test Suite
+mkdir build/test
+echo '<style>code {white-space:pre;}</style>' >> build/test/index.html
+echo '<code>' >> build/test/index.html
+cat lstackly/tests/*.lua >> build/test/index.html
+echo '</code>' >> build/test/index.html
+
 # Navigation and Head
 find build -type f > build_list
 while read -r line; do 
     if echo "$line" | grep -q html; then
-    	nav='<ul><li><a href="/index.html">Home</a></li><li><a href="/autodoc/">AutoDoc</a></li><li><a href="/book/">Book</a></li><li><a href="/examples/">Examples</a></li><li><a href="/rosetta/">RosettaCode Examples</a></li></ul>'
+    	nav='<ul><li><a href="/index.html">Home</a></li><li><a href="/autodoc/">AutoDoc</a></li><li><a href="/book/">Book</a></li><li><a href="/examples/">Examples</a></li><li><a href="/rosetta/">RosettaCode Examples</a></li><li><a href="/test/">Test Suite</a></li></ul>'
     	echo "<hr> $nav" >> "$line"
 
     	tmp="$(mktemp)"
